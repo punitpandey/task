@@ -94,6 +94,15 @@ def index():
             autoRegister: false,
             notifyButton: {
                 enable: true,
+                displayPredicate: function() {
+                return OneSignal.isPushNotificationsEnabled()
+                    .then(function(isPushEnabled) {
+                        /* The user is subscribed, so we want to return "false" to hide the Subscription Bell */
+                        $('#notifyDiv').hide();
+                        $('#activeDiv').show();
+                        return !isPushEnabled;
+                    });
+                },
             },
             welcomeNotification: {
                 "title": "Task",
@@ -145,12 +154,12 @@ def index():
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'mailmeonpunit@gmail.com'
-app.config['MAIL_PASSWORD'] = 'stephenhawking'
+app.config['MAIL_PASSWORD'] = '**********'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
-def tick():
+def task():
     basedir=os.path.abspath(os.path.dirname(__file__))
     sql_db = sqlite3.connect(basedir+'/assignment.db')
     sql_cursor = sql_db.cursor()
@@ -226,9 +235,9 @@ if __name__ == '__main__':
     sql_cursor.close()
     sql_db.close()
     scheduler = BackgroundScheduler()
-    scheduler.add_job(tick, 'interval', seconds=1,max_instances=10)
+    scheduler.add_job(task, 'interval', seconds=1,max_instances=10)
     scheduler.start()
-    app.run(port = 5800,debug=True)
+    app.run()
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
  
