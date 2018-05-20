@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dashboard</title>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+    <script>
+    var OneSignal = window.OneSignal || [];
+    
+    function getNotify(){
+        let name=document.getElementById("name").value;
+        // alert(name);
+        // push notify
+        OneSignal.push(function() {
+            OneSignal.on('subscriptionChange', function(isSubscribed) {
+                if (isSubscribed) {
+                // The user is subscribed
+                //   Either the user subscribed for the first time
+                //   Or the user was subscribed -> unsubscribed -> subscribed
+                OneSignal.getUserId( function(userId) {
+                    $.ajax({
+                        url:"/registerNotification",
+                        type:"POST",
+                        data:{
+                            "user":document.getElementById("name").value,
+                            "notify_id":userId
+                        },
+                        success:function(res){
+                            //alert(res);
+                            $('#notifyDiv').hide();
+                            $('#activeDiv').show();
+                        }
+                    });
+                    // Make a POST call to your server with the user ID
+                });
+                }
+            });
+            OneSignal.init({
+            appId: "e9af5911-ad44-4157-bd6c-6cfabf2374de",
+            autoRegister: false,
+            notifyButton: {
+                enable: true,
+                displayPredicate: function() {
+                return OneSignal.isPushNotificationsEnabled()
+                    .then(function(isPushEnabled) {
+                        /* The user is subscribed, so we want to return "false" to hide the Subscription Bell */
+                        $('#notifyDiv').hide();
+                        $('#activeDiv').show();
+                        return !isPushEnabled;
+                    });
+                },
+            },
+            welcomeNotification: {
+                "title": "Task",
+                "message": "Thank You! You will be notified with the updates now.",
+                // "url": "" /* Leave commented for the notification to not open a window on Chrome and Firefox (on Safari, it opens to your webpage) */
+            }
+            });
+        });
+    }
+    </script>
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper">
+          <a href="#!" class="brand-logo"></a>
+          <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+          <ul class="right hide-on-med-and-down">
+            <li><a href="/">Home</a></li>
+          </ul>
+        </div>
+      </nav>
+    
+      <ul class="sidenav" id="mobile-demo">
+        <li><a href="/">Home</a></li>
+      </ul>
+      <div class="container">
+          <div id="notifyDiv" class="row">
+            <div class="input-field col s12">
+              <input value="punit" id="name" type="text" class="validate">
+              <label class="active" for="name">Name</label>
+            </div>
+            <button class="btn waves-effect waves-light red lighten-2" type="submit" id="getAlert" name="action" onclick="getNotify()" name="action">Submit
+                <i class="material-icons right">send</i>
+              </button>
+          </div>
+          <div id="activeDiv" style="display: none;">
+            <center><h3>Ready to receive Notifications.</h3></center>
+          </div>
+      </div>
+</body>
+<script>
+    $( document ).ready(function(){
+        $('.sidenav').sidenav();
+    });
+</script>
+</html>
